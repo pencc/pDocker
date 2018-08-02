@@ -1,15 +1,18 @@
 package main
 
 import (
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
+	"pDocker/container"
 )
 
 var initCommand = cli.Command{
 	Name:  "init",
 	Usage: "Init container process run user's process in container. Do not call it outside",
-	Action: func(c *cli.Context) error {
+	Action: func(context *cli.Context) error {
 		log.Info("in init")
+		container.RunContainerInitProcess(context.Args().Get(0), nil)
 		return nil
 	},
 }
@@ -23,8 +26,13 @@ var runCommand = cli.Command{
 			Usage: "enable tty",
 		},
 	},
-	Action: func(c *cli.Context) error {
-		log.Info("in commit")
+	Action: func(context *cli.Context) error {
+		if len(context.Args()) < 1 {
+			return fmt.Errorf("Missing container command")
+		}
+		log.Info("in run")
+		log.Info("arg0:" + context.Args().Get(0))
+		container.Run(context.Bool("ti"), context.Args().Get(0))
 		return nil
 	},
 }
