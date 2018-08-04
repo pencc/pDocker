@@ -4,6 +4,7 @@ import (
 	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
+	"pDocker/cgroups"
 	"pDocker/container"
 )
 
@@ -25,14 +26,32 @@ var runCommand = cli.Command{
 			Name:  "ti",
 			Usage: "enable tty",
 		},
+		cli.StringFlag{
+			Name:  "m",
+			Usage: "memory limit",
+		},
+		cli.StringFlag{
+			Name:  "cpuset",
+			Usage: "cpu number",
+		},
+		cli.StringFlag{
+			Name:  "cpushare",
+			Usage: "cpu share",
+		},
 	},
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing container command")
 		}
-		log.Info("in run")
-		log.Info("arg0:" + context.Args().Get(0))
-		container.Run(context.Bool("ti"), context.Args().Get(0))
+
+		rc := cgroups.ResourceConfig{
+			MemoryLimit: context.String("m"),
+			CpuShare:    context.String("cpushare"),
+			CpuSet:      context.String("cpuset"),
+		}
+
+		log.Info("cmd:" + context.Args().Get(0))
+		container.Run(context.Bool("ti"), context.Args().Get(0), rc)
 		return nil
 	},
 }
